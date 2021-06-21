@@ -1,9 +1,4 @@
 const cells = document.querySelectorAll(".case");
-let tourJoueur = true; //tour joueur
-let tourCPU = true;
-let tourGagnant = false; //pas obligatoire
-let mark = true;
-let move = 0; //ход
 
 const winnerList = [
     [0, 1, 2],
@@ -17,154 +12,80 @@ const winnerList = [
 ];
 
 let markList = [];
+let timeoutId;
 
 const markCircle = (e) => {
-      
-     tourJoueurMessage ? console.log(messageJoueur) : console.log(messageCPU);
-     
-    let mark = tourJoueur ? "circle" : "cross" ; // if (tourJour) est vrai, circle, sinon, cross
-
-    const index = parseInt(e.target.id.substr(4));
-    e.target.classList.add(mark);
-    markList[index] = mark; 
-
-    if(mark === "circle") {
+    if(mark(e.target, "circle")) {
         pauseGame();
-    }
+        timeoutId = setTimeout(markCross, 2000);
+    };   
+};
 
-    // //подсчет ходов start
-    // if (move%2 !== 0) {
-    //     mark = "cross";
-    // } else {
-    //     mark = "circle";
-    // }
-    // move++;
-    // //подсчет ходов end move%2 !== 0 1, 3, 5... move%2 == 0, 2, 4, 6
+const markCross = () => {
+    timeoutId = null;
+    console.log("CPU mark");
+    let freeCase = []; 
 
-  
-    //ход компьютера
-    setTimeout(function(){ 
-        while (true) {
-            let r = randomInt(0,8);
-            if(markList[index] === "circle") {
-                document.querySelectorAll(".case")[r].classList.add("cross");
-                break;
-            }
+    for (let i = 0; i < 9; i++) {
+        if(!markList[i]) {
+            freeCase.push(i);
         }
-        move++;
-        hasWin();
-    }, 3000);
+    }
+    const index = freeCase[Math.round(Math.random() * (freeCase.length - 1))];
+    
+    if(0 !== index && !index) {
+        startGame();
+    } else if (mark(cells[index], "cross")) {
+        resumeGame();
+    };
+}; 
 
-
-    console.log(move);
-
+//fonction qui peut servir pour deux
+const mark = (cell, mark) => {
+    const index = parseInt(cell.id.substr(4));
     if (markList[index]) {
-        //case déjà prise true ou false
+        //j'ai pas marqué, ca s'est arrêté.
         return false;
     }
 
-    tourJoueur = !tourJoueur; // true --> false, false --> true ca passe à un autre joueur
+    cell.classList.add(mark);
+    markList[index] = mark; 
 
-    tourJoueurMessage = !tourJoueurMessage;
-    
     // mettre 5 quand il y aura l'ordi
-    if(5 > markList.length) {
-        return;
-    } else if (!hasWin(mark)) {
-        return;
+    if(5 > markList.length || !hasWin(mark)) {
+        return true;
+        //j'ai marqué et j'ai pas gagné 
     }
+    stopGame();
+    "circle" === mark ? incrementPlayer() : incrementCPU();
+    return false;
+}; 
+
+const stopGame = () => {
+    stop();  
+    disapearAppear(btnPause, btnStart);
+    pauseGame();
+    popUpWin();
 };
 
-  // Случайное целое число в диапазоне min-max
-  let randomInt = (min, max) => {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-    
-    
-};
-
-// const hasWin = (mark) => {
-//     for (const win of winnerList) {
-//         if (mark === markList[win[0]] && 
-//             mark === markList[win[1]] &&
-//             mark === markList[win[2]]
-//             ) {
-//                 console.log("Vous avez gagné!");
-//                 console.log( );
-//                             //pop up win
-//                             //popUpWin();
-                
-//              return true;
-//         }
-//     }
-//    //console.log("je vérifie la victoire");
-//    return false;
-// }
-
-
-const hasWin = () => {
+const hasWin = (mark) => {
     for (const win of winnerList) {
-            //ничья добавить
-        if ("circle" === markList[win[0]] && 
-            "circle"  === markList[win[1]] &&
-            "circle"  === markList[win[2]] ) {
-                tourGagnant = true; 
-            
-            console.log("Vous avez gagné!");
-            incrementPlayer();
-
-            // refresh le scoore, appear button start 
-            stop();  
-            disapearAppear(btnPause, btnStart);
-            pauseGame();
-            popUpWin();
-            //break;
-        }
-
-        if ("cross" === markList[win[0]] && 
-            "cross" === markList[win[1]] &&
-            "cross" === markList[win[2]]) {
-                tourGagnant = true; 
-           
-            console.log("Le CPU a gagné!");
-            incrementCPU();
-
-            // refresh le scoore, appear button start 
-            stop();  
-            disapearAppear(btnPause, btnStart);
-            pauseGame();   
-            popUpWin(); 
-            //break;
+        if (mark === markList[win[0]] && 
+            mark === markList[win[1]] &&
+            mark === markList[win[2]]
+            ) {
+                console.log("Vous avez gagné!");
+                console.log( );
+                            //pop up win
+                            //popUpWin();
+                
+             return true;
         }
     }
-  
+   //console.log("je vérifie la victoire");
+   return false;
 }
 
-const popUpWin = () => {
-const divContainerWin = document.createElement("div");
-divContainerWin.classList.add("modal");
-divContainerWin.tabindex = "-1";
-
-divContainerWin.innerHTML = `
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Félicitations!</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <p>Vous avez gagné!</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>`;
-
-const main = document.querySelector("main");
-main.appendChild(divContainerWin);
-let myModal = new bootstrap.Modal(divContainerWin);
-myModal.show();
-};
 
 const startGame = () => {
     cells.forEach((cell) => {
@@ -172,13 +93,19 @@ const startGame = () => {
     });
 };
 
+//desable
 const pauseGame = () => {
     cells.forEach((cell) => {
+        clearTimeout(timeoutId);
         cell.removeEventListener("click", markCircle);
     });
 };
 
+//enable
 const resumeGame = () => {
+    if(timeoutId) {
+        markCross();
+    }
     cells.forEach((cell) => {
         cell.addEventListener("click", markCircle);
     });
