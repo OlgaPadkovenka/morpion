@@ -1,25 +1,36 @@
-const cells = document.querySelectorAll(".case");
-
-const winnerList = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
-];
-
-let markList = [];
+let cells;
+let markList;
 let timeoutId;
+let winnerList;
 
-const markCircle = (e) => {
-    if(mark(e.target, "circle")) {
-        pauseGame();
-        timeoutId = setTimeout(markCross, 2000);
-    };   
-};
+const initGride = () => {
+    initTimer();
+    initScore();
+    cells = $(".case");
+    markList = [];
+    timeoutId;
+    winnerList = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6],
+    ];
+btnStart.on("click", initGame);
+btnPause.on("click", pauseGame);
+btnResume.on("click", resumeGame);
+}
+
+ const markCircle = (e) => {
+    const target = $(e.target);
+     if(mark(target, "circle")) {
+         pauseGame();
+         timeoutId = setTimeout(markCross, 2000);
+     };   
+ };
 
 const markCross = () => {
     timeoutId = null;
@@ -42,13 +53,14 @@ const markCross = () => {
 
 //fonction qui peut servir pour deux
 const mark = (cell, mark) => {
-    const index = parseInt(cell.id.substr(4));
+    const celljquery = $(cell);
+    const index = parseInt(celljquery.attr("id").substr(4));
     if (markList[index]) {
         //j'ai pas marqué, ca s'est arrêté.
         return false;
     }
 
-    cell.classList.add(mark);
+    celljquery.addClass(mark);
     markList[index] = mark; 
 
     // mettre 5 quand il y aura l'ordi
@@ -65,7 +77,7 @@ const stopGame = () => {
     stop();  
     disapearAppear(btnPause, btnStart);
     pauseGame();
-    popUpWin();
+    //popUpWin();
 };
 
 const hasWin = (mark) => {
@@ -75,9 +87,8 @@ const hasWin = (mark) => {
             mark === markList[win[2]]
             ) {
                 console.log("Vous avez gagné!");
-                console.log( );
                             //pop up win
-                            //popUpWin();
+                            popUpWin();
                 
              return true;
         }
@@ -88,16 +99,18 @@ const hasWin = (mark) => {
 
 
 const startGame = () => {
-    cells.forEach((cell) => {
-        cell.addEventListener("click", markCircle); 
+    cells.each((index, cell) => {
+        const celljquery = $(cell);
+        celljquery.on("click", markCircle); 
     });
 };
 
 //desable
 const pauseGame = () => {
-    cells.forEach((cell) => {
+    cells.each((index, cell) => {
+        const celljquery = $(cell);
         clearTimeout(timeoutId);
-        cell.removeEventListener("click", markCircle);
+        celljquery.off("click", markCircle);
     });
 };
 
@@ -106,19 +119,17 @@ const resumeGame = () => {
     if(timeoutId) {
         markCross();
     }
-    cells.forEach((cell) => {
-        cell.addEventListener("click", markCircle);
+    cells.each((index, cell) => {
+        const celljquery = $(cell);
+        celljquery.on("click", markCircle);
     });
 };
 
 const initGame = () => {
     markList.splice(0);
-    cells.forEach((cell) => {
-        cell.classList.remove("circle", "cross");
+    cells.each((index, cell) => {
+        const celljquery = $(cell);
+        celljquery.removeClass("circle", "cross");
     });
     resumeGame(); 
 };
-
-btnStart.addEventListener("click", initGame);
-btnPause.addEventListener("click", pauseGame);
-btnResume.addEventListener("click", resumeGame);

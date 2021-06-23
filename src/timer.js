@@ -1,21 +1,37 @@
-const btnStart = document.querySelector("#timerStart");
-const btnPause = document.querySelector("#timerPause");
-const btnResume = document.querySelector("#timerResume");
+let btnStart;
+let btnPause;
+let btnResume;
 
 
-const timer = document.querySelector("#timerTime");
-const date = new Date(0); 
+let timer;
+let date; 
 
-let intervalId = 0;
+let intervalId;
+
+const initTimer = () => {
+    btnStart = $("#timerStart");
+    btnPause = $("#timerPause");
+    btnResume = $("#timerResume");
+
+
+    timer = $("#timerTime");
+    date = new Date(0); 
+
+    intervalId = 0;
+
+    btnStart.on("click", start);
+    btnPause.on("click", pause);
+    btnResume.on("click", resume);
+ };
 
 
 const disapearAppear = (disapear, appear) => {
-disapear.classList.replace("d-block", "d-none");
-appear.classList.replace("d-none", "d-block");
+disapear.addClass("d-none").removeClass("d-block");
+appear.addClass("d-block").removeClass("d-none");
 };
 
 const increment = () => {
-    timer.innerText = date.toISOString().substr(14, 5);
+    timer.text(date.toISOString().substr(14, 5));
     date.setSeconds(date.getSeconds() + 1);
 };
 
@@ -40,7 +56,3 @@ const resume = () => {
 const stop = () => {
     clearInterval(intervalId);
 };
-
-btnStart.addEventListener("click", start);
-btnPause.addEventListener("click", pause);
-btnResume.addEventListener("click", resume);

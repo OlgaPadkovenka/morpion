@@ -15,7 +15,7 @@
   \********************/
 /***/ (() => {
 
-eval("\n\n//# sourceURL=webpack://html-training/./src/app.js?");
+eval("$(initGride);\n\n//# sourceURL=webpack://html-training/./src/app.js?");
 
 /***/ }),
 
