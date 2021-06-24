@@ -45,8 +45,8 @@ const markCross = () => {
     const index = freeCase[Math.round(Math.random() * (freeCase.length - 1))];
     
     if(0 !== index && !index) {
-        startGame();
-    } else if (mark(cells[index], "cross")) {
+        stopGame("Personne n'a gagné!", "Essayez encore une fois!");
+    } else if (mark($(cells[index]), "cross")) {
         resumeGame();
     };
 }; 
@@ -68,16 +68,25 @@ const mark = (cell, mark) => {
         return true;
         //j'ai marqué et j'ai pas gagné 
     }
-    stopGame();
-    "circle" === mark ? incrementPlayer() : incrementCPU();
+    //modal avec condition des messages
+    if ("circle" === mark) {
+        incrementPlayer();
+        stopGame("Vous avez gagné!", "Félicitations!");
+        return false;
+    }
+    incrementCPU();
+    stopGame("Le CPU a gagné!", "Essaye encore une fois!");
+    // stopGame();
+    // "circle" === mark ? incrementPlayer() : incrementCPU();
     return false;
 }; 
 
-const stopGame = () => {
+const stopGame = (titre, description) => {
     stop();  
     disapearAppear(btnPause, btnStart);
     pauseGame();
-    //popUpWin();
+    popUpWin(titre, description);
+   
 };
 
 const hasWin = (mark) => {
@@ -88,7 +97,7 @@ const hasWin = (mark) => {
             ) {
                 console.log("Vous avez gagné!");
                             //pop up win
-                            popUpWin();
+                            //popUpWin();
                 
              return true;
         }
@@ -129,7 +138,9 @@ const initGame = () => {
     markList.splice(0);
     cells.each((index, cell) => {
         const celljquery = $(cell);
-        celljquery.removeClass("circle", "cross");
+
+        //si'il y a pluqieurs classe, il faut []
+        celljquery.removeClass(["circle", "cross"]);
     });
     resumeGame(); 
 };
